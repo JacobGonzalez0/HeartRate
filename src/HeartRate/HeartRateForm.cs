@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Net;
+using System.Net.Http;
+using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -42,7 +46,9 @@ public partial class HeartRateForm : Form
     private readonly Queue<Font> _lastFonts = new();
     private IntPtr _oldIconHandle;
 
-    public HeartRateForm() : this(
+
+
+        public HeartRateForm() : this(
         Environment.CommandLine.Contains("--test")
             ? new TestHeartRateService()
             : new HeartRateService(),
@@ -56,43 +62,44 @@ public partial class HeartRateForm : Form
         string settingsFilename,
         DateTime now)
     {
-        try
-        {
-            DebugLog.Initialize(HeartRateSettings.GetSettingsFile("logs.txt"));
-            AppDomain.CurrentDomain.UnhandledException += UnhandledException;
-            DebugLog.WriteLog("Starting up");
-            // Order of operations -- _startedAt has to be set before
-            // `LoadSettingsLocked` is called.
-            _startedAt = now;
+            try
+            {
+                DebugLog.Initialize(HeartRateSettings.GetSettingsFile("logs.txt"));
+                AppDomain.CurrentDomain.UnhandledException += UnhandledException;
+                DebugLog.WriteLog("Starting up");
+                // Order of operations -- _startedAt has to be set before
+                // `LoadSettingsLocked` is called.
+                _startedAt = now;
 
-            _settings = HeartRateSettings.CreateDefault(settingsFilename);
-            LoadSettingsLocked();
-            _settings.Save();
-            _service = service;
-            _iconBitmap = new Bitmap(_iconWidth, _iconHeight);
-            _iconGraphics = Graphics.FromImage(_iconBitmap);
-            _measurementFont = new Font(_settings.FontName, _iconWidth, GraphicsUnit.Pixel);
-            _watchdog = new HeartRateServiceWatchdog(TimeSpan.FromSeconds(10), _service);
+                _settings = HeartRateSettings.CreateDefault(settingsFilename);
+                LoadSettingsLocked();
+                _settings.Save();
+                _service = service;
+                _iconBitmap = new Bitmap(_iconWidth, _iconHeight);
+                _iconGraphics = Graphics.FromImage(_iconBitmap);
+                _measurementFont = new Font(_settings.FontName, _iconWidth, GraphicsUnit.Pixel);
+                _watchdog = new HeartRateServiceWatchdog(TimeSpan.FromSeconds(10), _service);
 
-            InitializeComponent();
+                InitializeComponent();
 
-            FormBorderStyle = _settings.Sizable
-                ? FormBorderStyle.Sizable
-                : FormBorderStyle.SizableToolWindow;
+                FormBorderStyle = _settings.Sizable
+                    ? FormBorderStyle.Sizable
+                    : FormBorderStyle.SizableToolWindow;
 
-            CreateEnumSubmenu<ContentAlignment>(
-                textAlignmentToolStripMenuItem,
-                textAlignmentToolStripMenuItemItem_Click);
+                CreateEnumSubmenu<ContentAlignment>(
+                    textAlignmentToolStripMenuItem,
+                    textAlignmentToolStripMenuItemItem_Click);
 
-            CreateEnumSubmenu<ImageLayout>(
-                backgroundImagePositionToolStripMenuItem,
-                backgroundImagePositionToolStripMenuItemItem_Click);
-        }
-        catch
-        {
-            service.TryDispose();
-            throw;
-        }
+                CreateEnumSubmenu<ImageLayout>(
+                    backgroundImagePositionToolStripMenuItem,
+                    backgroundImagePositionToolStripMenuItemItem_Click);
+            }
+
+            catch
+            {
+                service.TryDispose();
+                throw;
+            }
     }
 
     private void UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -141,7 +148,7 @@ public partial class HeartRateForm : Form
         {
             DebugLog.WriteLog($"Exception in Service_HeartRateUpdated {ex}");
 
-            Debugger.Break();
+            //
         }
     }
 
@@ -165,7 +172,10 @@ public partial class HeartRateForm : Form
         var isWarn = warnLevel > 0 && bpm >= warnLevel;
         var isAlert = alertLevel > 0 && bpm >= alertLevel;
 
-        lock (_updateSync)
+
+            
+
+            lock (_updateSync)
         {
             if (reading.IsError)
             {
@@ -252,13 +262,32 @@ public partial class HeartRateForm : Form
                     ? _settings.UIWarnColor
                     : _settings.UIColor;
 
+                
                 UpdateUICore();
+                Task.Run(() => SendStatus(_iconText));
+
                 Invalidate();
             }
         }));
     }
 
-    private void UpdateUI()
+    private async Task SendStatus(string bpm)
+    {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("http://localhost:3000");
+                var content = new FormUrlEncodedContent(new[]
+                {
+                new KeyValuePair<string, string>("bpm", bpm)
+            });
+                var result = await client.PostAsync("/", content);
+                string resultContent = await result.Content.ReadAsStringAsync();
+                Console.WriteLine(resultContent);
+            }
+
+        }
+
+        private void UpdateUI()
     {
         Invoke(new Action(UpdateUICore));
     }
