@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace HeartRate;
+namespace HeartRate { 
 
 static class Program
 {
@@ -18,4 +18,5 @@ static class Program
         Application.SetCompatibleTextRenderingDefault(false);
         Application.Run(new HeartRateForm());
     }
+}
 }

@@ -6,7 +6,7 @@ using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Devices.Enumeration;
 using Windows.Storage.Streams;
 
-namespace HeartRate;
+namespace HeartRate { 
 
 internal enum ContactSensorStatus
 {
@@ -254,4 +254,5 @@ internal class HeartRateService : IHeartRateService
             Cleanup();
         }
     }
+}
 }

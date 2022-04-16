@@ -4,9 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace HeartRate;
+namespace HeartRate { }
 
-internal static class DateTimeFormatter
+
+internal static class DateTimeFormatter 
 {
     public const string DefaultFilename = "yyyy-MM-dd hh-mm tt";
     public const string DefaultColumn = "";
@@ -57,4 +58,4 @@ internal static class DateTimeFormatter
             _ => datetime.ToString(formatter)
         };
     }
-}
+} 

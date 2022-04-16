@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static HeartRate.User32;
 
-namespace HeartRate;
+namespace HeartRate {
 
 public partial class HeartRateForm : Form
 {
@@ -717,4 +717,5 @@ public partial class HeartRateForm : Form
     //    }
     //}
     #endregion
+}
 }

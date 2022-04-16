@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 using System.Windows.Forms;
 
-namespace HeartRate;
+namespace HeartRate { 
 
 internal static class Prompt
 {
@@ -75,4 +75,5 @@ internal static class Prompt
         file = dlg.FileName;
         return true;
     }
+}
 }

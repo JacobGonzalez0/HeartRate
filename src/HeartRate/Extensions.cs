@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
 
-namespace HeartRate;
+namespace HeartRate { }
 
 internal static class Extensions
 {

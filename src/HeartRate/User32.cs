@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace HeartRate;
+namespace HeartRate { 
 
 internal static class User32
 {
@@ -19,4 +19,5 @@ internal static class User32
         SmallIconX = 49, // SM_CXSMICON
         SmallIconY = 50, // SM_CYSMICON
     }
+}
 }

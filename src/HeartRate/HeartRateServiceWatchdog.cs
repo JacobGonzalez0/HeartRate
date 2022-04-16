@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Threading;
 
-namespace HeartRate;
+namespace HeartRate { 
 
 internal class HeartRateServiceWatchdog : IDisposable
 {
@@ -82,4 +82,5 @@ internal class HeartRateServiceWatchdog : IDisposable
             _isDisposed = true;
         }
     }
+}
 }
